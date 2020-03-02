@@ -1,4 +1,4 @@
-# Data Description ============================================================
+# Data Description 
 
 We will need some home listing data, so we will use BeautifulSoup and a headless Firefox server to scrape some house listings. Then, we will poll the Foursquare API looking for bookstores, coffee shops, and also some general explore calls to estimate densty of venues. 
 
