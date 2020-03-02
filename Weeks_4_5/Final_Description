@@ -1,0 +1,25 @@
+"""
+== Introduction/Business Problem ===============================================
+
+A young professor couple are moving to Eau Claire, Wisconsin this summer.
+They have generous moving funds from their new jobs, so they hire a realtor consulting
+firm focused on finding young professionals homes they love in unfamiliar cities. 
+
+The couple hope to have children soon, so definitely want to be near schools. 
+They'd also like for there to be things in walking distance, like parks or
+downtown areas, but don't want to live downtown. 
+
+================================================================================
+== Data Description ============================================================
+
+We will need some home listing data, so we will use BeautifulSoup and a headless
+Firefox server to scrape some house listings. Then, we will poll the Foursquare
+API looking for bookstores, coffee shops, and also some general explore calls
+to estimate densty of venues. 
+
+Once we've downloaded a few websites, we need to scrape the physical addresses 
+out of the listings and get GPS coordinates for them. We'll also hold onto
+the web address of the listing, for later plotting on a Folium map. 
+================================================================================
+================================================================================
+"""
