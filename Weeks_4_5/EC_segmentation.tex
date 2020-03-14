@@ -181,10 +181,12 @@ We used two machine learning techniques from Scikit-Learn: $K$-means clustering 
 %
 \end{itemize}
 
+\newpage
+
 \subsection{Exploratory Data Analysis}
 
 We used exploratory data analysis in two ways: to analyze the clusters resulting from $K$-means, and to choose the $\varepsilon$ (epsilon) parameter to use in our DBSCAN, based on the ``reachability graph'' produced from OPTICS. 
-\vspace{1cm}
+%\vspace{1cm}
 
 \noindent{\bf Analyzing $K$-means clustering.} Before fitting an instance of {\tt sklearn.cluster.KMeans(n\_clusters=3)} on our density data, we plotted the densities to estimate the clustering that we hoped to find. The densities were calculated on the number of venues $N$ returned using 
 \begin{verbatim}GET https://api.foursquare.com/v2/venues/explore?...&radius=750&limit=50\end{verbatim}
@@ -212,26 +214,38 @@ Max: 0.72
 \end{verbatim}
 \end{minipage}
 
-\vspace{1cm}
+%\vspace{1cm}
 \noindent{\bf Analyzing OPTICS reachability graph.} As hinted at in the previous subsection, OPTICS processes the points in a data set in a specific order and measures the so-called {\em reachability distance} from the current point under consideration to those already processed. This reachability distance essentially captures the radius $r$ one would have to use to cause the current point to be considered in the same cluster as the closest previous point. Thus, if we plot the reachability distances calculated in the order that OPTICS processes the points, then we can visually see the clusters as ``valleys'' in this reachability plot: remembering that the reachability distance $r(P_j)$ of the $j$-th considered point $P_j$ primarily involves $P_j$'s distance to $P_{j-1}$, we see that when the reachability drops it indicates that $P_j$ is much closer to $P_{j-1}$ than $P_{j-1}$ was to $P_{j-2}$, etc. 
 
-%\footnote{Ankerst, Breuning, Kriegel, Sander. {\em OPTICS: Ordering Points To Identify the Clustering Structure.} Proc. ACM SIGMOD'99 Int. Conf. on Management of Data, Philadelphia, PA, 1999.}
 The paper \footnote{Ankerst, Mihael, Markus M. Breunig, Hans-Peter Kriegel, and Jörg Sander. “OPTICS: ordering points to identify the clustering structure.” ACM SIGMOD Record 28, no. 2 (1999): 49-60.} originating the OPTICS algorithm proposed the so-called $\xi$-steepness clustering method, where cluster boundaries are identified on the reachability plots by finding regions where consecutive points are at least $\xi$\% greater or less than the points before. The advantage of this method is that it does not require a fixed threshold be used to decide on what makes a cluster, like one has to do with DBSCAN. 
-
-\hspace{-2.5cm}\includegraphics[scale=0.43]{OPTICS_reachability_2.png}
 
 \section{Results and discussion}
 
 Our analysis of the density of venues around house listings in Eau Claire, Wisconsin, indicate that in addition to the expected high densities near downtown and the university campus, there is another region where there are many stores southeast of the downtown area, near the mall. Once one leaves the downtown area, the density of stores decreases rapidly (aside from the mall). The houses are, however, seemingly evenly spread across the city and surrounding suburbs/exurbs. 
 
+\hspace{-2.5cm}\includegraphics[scale=0.43]{OPTICS_reachability_2.png}
+
 OPTICS revealed five natural clusters in the housing. In order to give some meaning to these clusters for our clients, we created a scatterplot with the OPTICS cluster on the $x$-axis and the average number of each type of venue (coffee shops, libraries, bookstores, parks/playgrounds, schools) within 1.5 miles of the listing. 
 
-\hspace{-2.5cm}\includegraphics[scale=0.43]{Avg_venues.png}
+%\hspace{-2.5cm}
+\begin{center}
+\includegraphics[scale=0.4]{Avg_venues.png}
+\end{center}
 
-This scatterplot reveals some interesting information about Eau Claire that is possibly difficult to get in other ways. For example, we see that there are between 3 and 7 schools near each of the listing clusters, on average. Additionally, there are two dramatically distinct groupings in terms of the average number of parks and playgrounds near the listings, with the outliers (group -1), and groups 0 and 1, having 5 to 7 parks nearby; the remaining clusters average 19 to 22 parks and playgrounds in the vicinity. The other features are more similar in terms of the average number of venues of each category nearby. Cluster 1 has the most coffee shops, on average, and looking at the below Folium maps we see that these are clustered around the aforementioned shopping center southeast of downtown. Some independent research shows that there are several small/local coffee shops in the downtown area, but seemingly not so close to the many listings in the {\em Third Ward} neighborhood (or at least not to be found on Foursquare by our methods).
+This scatterplot reveals some interesting information about Eau Claire that is possibly difficult to get in other ways. For example, we see that there are between 3 and 7 schools near each of the listing clusters, on average. Additionally, there are two dramatically distinct groupings in terms of the average number of parks and playgrounds near the listings, with the outliers (group -1), and groups 0 and 1, having 5 to 7 parks nearby; the remaining clusters average 19 to 22 parks and playgrounds in the vicinity. 
 
+The other features are more similar in terms of the average number of venues of each category nearby. Cluster 1 has the most coffee shops, on average, and looking at the below Folium maps we see that these are clustered around the aforementioned shopping center southeast of downtown. Some independent research shows that there are several small/local coffee shops in the downtown area, but seemingly not so close to the many listings in the {\em Third Ward} neighborhood (or at least not to be found on Foursquare by our methods). Screenshots of our Folium maps are shown below, with the color-coded clustering on the left and the density map on the right. Remember, green is low density, yellow is medium, and red is high.
 
+\hspace{-0.7cm}\includegraphics[scale=0.36]{Clusters.png}
+\includegraphics[scale=0.36]{Densities.png}
 
+\subsection{Recommendations}
+Cluster 3 is really the optimal choice for our clients: there are numerous parks, but also many coffee shops and schools. Additionally, these listings tend to be downtown or adjacent-to-downtown, and we can see by comparing the two maps above that there are low, medium, and high density listings all contained within cluster 3. 
+
+\section{Conclusion}
+With the assistance of several machine learning tools, we were able to meaningfully segment the housing listings we scraped from Trulia.com according to density of all nearby venues, and also density of several categories of venue of special interest to our clients. We used $K$-means clustering for total density, and this formed clusters along natural gaps in the density measurements. The clustering obtained from OPTICS, with the $\xi$-steepness method, required more investigation, as one might expect from unsupervised algorithms that aim to find ``natural'' clustering in the higher-dimensional data. Our investigations of these clusters lead to the discovery that while schools are common and evenly dispersed around Eau Claire, there are around 20 parks or playgrounds near houses in 3 of our 5 clusters. We suspect the clustering was influenced heavily by this parks/playgrounds feature (though we normalized our data to not let such high scores dominate {\em a priori}), with secondary considerations along other variances, such as the number of coffee shops. 
+
+We hope that our clients can take this information and focus their search on a number of properties. We did not investigate variance in prices, nor among beds/baths, but we would be glad to have our contract with these clients extended to provide further segmentation and analysis of these houses. 
 
 \end{document}
 
